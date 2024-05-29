@@ -6,11 +6,16 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f0f0f0;
         }
         .container {
             max-width: 400px;
             margin: auto;
             text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         button {
             padding: 10px 20px;
@@ -20,6 +25,7 @@
             color: white;
             border: none;
             border-radius: 5px;
+            transition: background-color 0.3s;
         }
         button:hover {
             background-color: #45a049;
@@ -34,7 +40,7 @@
 <body>
     <div class="container">
         <h1>Extend Cookie Expiration</h1>
-        <p>Click the button below to extend the expiration date of your cookies.</p>
+        <p>Click the button below to extend the expiration date of your cookies and save the updated script to a JSON file.</p>
         <button onclick="askAndExtendCookies()">Extend Cookies</button>
         <div class="message" id="message"></div>
     </div>
@@ -62,10 +68,26 @@
                 const [name, value] = cookie.split("=");
                 const newExpirationDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
                 document.cookie = `${name}=${value}; expires=${newExpirationDate.toUTCString()}; path=/`;
-                extendedCookies.push(`${name}=${value}; expires=${newExpirationDate.toUTCString()}; path=/`);
+                extendedCookies.push({ name: name, value: value, expires: newExpirationDate.toUTCString() });
             });
 
-            document.getElementById('message').innerText = `Cookies extended by ${days} days:\n${extendedCookies.join("\n")}`;
+            document.getElementById('message').innerText = `Cookies extended by ${days} days.`;
+            saveToFile(extendedCookies);
+        }
+
+        function saveToFile(data) {
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'extended_cookies.json';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
         }
     </script>
 </body>
