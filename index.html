@@ -9,7 +9,7 @@
             font-family: 'Times New Roman', serif;
             margin: 0;
             padding: 0;
-            background-image: url('https://1drv.ms/i/c/beaab594c104748b/ESKajUkf4_BJlQCJ2V6K97UBVrIFbYN2w7kwb8ddAv-o2Q?e=qR7SmB');
+            background-image: url('https://1drv.ms/i/c/beaab594c104748b/ESKajUkf4_BJlQCJ2V6K97UBVrIFbYN2w7kwb8ddAv-o2Q?e=HZlxuN');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -226,11 +226,11 @@
                 };
 
                 mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
                     const audioUrl = URL.createObjectURL(audioBlob);
                     const a = document.createElement('a');
                     a.href = audioUrl;
-                    a.download = 'tts_audio.wav';
+                    a.download = 'tts_audio.mp3';
                     document.body.appendChild(a);
                     a.click();
                     setTimeout(() => {
