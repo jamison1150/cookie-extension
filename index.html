@@ -9,7 +9,7 @@
             font-family: 'Times New Roman', serif;
             margin: 0;
             padding: 0;
-            background-image: url('https://1drv.ms/i/c/beaab594c104748b/ESKajUkf4_BJlQCJ2V6K97UBVrIFbYN2w7kwb8ddAv-o2Q?e=HZlxuN');
+            background-image: url('SelectedBG.jpg'); /* Use the path to the enhanced image */
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -206,44 +206,24 @@
             }
         }
 
-        // Download Audio Function
+        // Download Audio Function using ttsMP3.com
         async function downloadAudio() {
             const text = document.getElementById('textToSpeak').value;
             const selectedVoiceName = voiceSelect.selectedOptions[0].getAttribute('data-name');
             if (text.trim() !== "") {
-                const utterance = new SpeechSynthesisUtterance(text);
-                const voices = synth.getVoices();
-                const selectedVoice = voices.find(voice => voice.name === selectedVoiceName);
-                utterance.voice = selectedVoice;
-
-                // Create a MediaRecorder to capture the audio
-                const stream = new MediaStream();
-                const mediaRecorder = new MediaRecorder(stream);
-                const audioChunks = [];
-
-                mediaRecorder.ondataavailable = event => {
-                    audioChunks.push(event.data);
-                };
-
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    const a = document.createElement('a');
-                    a.href = audioUrl;
-                    a.download = 'tts_audio.mp3';
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => {
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(audioUrl);
-                    }, 0);
-                };
-
-                mediaRecorder.start();
-                synth.speak(utterance);
-                utterance.onend = () => {
-                    mediaRecorder.stop();
-                };
+                const url = `https://ttsmp3.com/makemp3_new.php?msg=${encodeURIComponent(text)}&lang=${selectedVoiceName}&source=ttsmp3`;
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const audioUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = audioUrl;
+                a.download = 'tts_audio.mp3';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(audioUrl);
+                }, 0);
             } else {
                 alert("Please enter some text to speak.");
             }
