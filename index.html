@@ -70,6 +70,10 @@
             }
         }
     </style>
+    <!-- Meta tags to disable caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 </head>
 <body>
     <div class="container">
@@ -123,6 +127,19 @@
                 window.URL.revokeObjectURL(url);
             }, 0);
         }
+
+        // Function to add a cache-busting query string to the CSS file
+        function addCacheBustingQueryString() {
+            const link = document.querySelector('link[rel="stylesheet"]');
+            if (link) {
+                const url = new URL(link.href);
+                url.searchParams.set('v', Date.now());
+                link.href = url.toString();
+            }
+        }
+
+        // Call the function to add the cache-busting query string
+        addCacheBustingQueryString();
     </script>
 </body>
 </html>
