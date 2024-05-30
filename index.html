@@ -9,7 +9,7 @@
             font-family: 'Times New Roman', serif;
             margin: 0;
             padding: 0;
-            background-image: url('https://pplx-res.cloudinary.com/image/upload/v1717062683/user_uploads/iwqczlnhd/_e66d92aa-4ceb-4dae-9907-b9f1333d358c.jpg?v=1');
+            background-image: url('https://1drv.ms/i/c/beaab594c104748b/ESKajUkf4_BJlQCJ2V6K97UBVrIFbYN2w7kwb8ddAv-o2Q?e=qR7SmB');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -18,9 +18,6 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            image-rendering: -webkit-optimize-contrast; /* Chrome, Safari */
-            image-rendering: crisp-edges; /* Firefox */
-            image-rendering: pixelated; /* Other browsers */
         }
         .container {
             max-width: 400px;
@@ -60,6 +57,26 @@
             font-size: 14px;
             color: #d8c3a5; /* Text color */
         }
+        .text-to-speech {
+            margin-top: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+        }
         @media (max-width: 600px) {
             .container {
                 padding: 15px;
@@ -87,6 +104,12 @@
         <p>Click the button below to extend the expiration date of your cookies and save the updated script to a JSON file.</p>
         <button onclick="askAndExtendCookies()">Extend Cookies</button>
         <div class="message" id="message"></div>
+        <div class="text-to-speech">
+            <textarea id="textToSpeak" placeholder="Enter text to convert to speech..."></textarea>
+            <select id="voiceSelect"></select>
+            <button onclick="textToSpeech()">Speak</button>
+            <button onclick="downloadAudio()">Download</button>
+        </div>
     </div>
     <script>
         function askAndExtendCookies() {
@@ -146,6 +169,85 @@
 
         // Call the function to add the cache-busting query string
         addCacheBustingQueryString();
+
+        // Populate voice options
+        const synth = window.speechSynthesis;
+        const voiceSelect = document.getElementById('voiceSelect');
+
+        function populateVoiceList() {
+            const voices = synth.getVoices();
+            voiceSelect.innerHTML = '';
+            voices.forEach(voice => {
+                const option = document.createElement('option');
+                option.textContent = `${voice.name} (${voice.lang})`;
+                option.setAttribute('data-lang', voice.lang);
+                option.setAttribute('data-name', voice.name);
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        populateVoiceList();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
+
+        // Text-to-Speech Function
+        function textToSpeech() {
+            const text = document.getElementById('textToSpeak').value;
+            const selectedVoiceName = voiceSelect.selectedOptions[0].getAttribute('data-name');
+            if (text.trim() !== "") {
+                const utterance = new SpeechSynthesisUtterance(text);
+                const voices = synth.getVoices();
+                const selectedVoice = voices.find(voice => voice.name === selectedVoiceName);
+                utterance.voice = selectedVoice;
+                synth.speak(utterance);
+            } else {
+                alert("Please enter some text to speak.");
+            }
+        }
+
+        // Download Audio Function
+        async function downloadAudio() {
+            const text = document.getElementById('textToSpeak').value;
+            const selectedVoiceName = voiceSelect.selectedOptions[0].getAttribute('data-name');
+            if (text.trim() !== "") {
+                const utterance = new SpeechSynthesisUtterance(text);
+                const voices = synth.getVoices();
+                const selectedVoice = voices.find(voice => voice.name === selectedVoiceName);
+                utterance.voice = selectedVoice;
+
+                // Create a MediaRecorder to capture the audio
+                const stream = new MediaStream();
+                const mediaRecorder = new MediaRecorder(stream);
+                const audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const a = document.createElement('a');
+                    a.href = audioUrl;
+                    a.download = 'tts_audio.wav';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(audioUrl);
+                    }, 0);
+                };
+
+                mediaRecorder.start();
+                synth.speak(utterance);
+                utterance.onend = () => {
+                    mediaRecorder.stop();
+                };
+            } else {
+                alert("Please enter some text to speak.");
+            }
+        }
     </script>
 </body>
 </html>
